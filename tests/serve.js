@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = 3000;
-const PUBLIC_DIR = path.resolve(__dirname, '../vercel-deploy/public');
+const ROOT_DIR = path.resolve(__dirname, '..');
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -21,7 +21,7 @@ const server = http.createServer((req, res) => {
   if (reqPath === '/') reqPath = '/index.html';
   if (reqPath === '/admin' || reqPath === '/admin/') reqPath = '/admin/index.html';
 
-  let filePath = path.join(PUBLIC_DIR, reqPath);
+  let filePath = path.join(ROOT_DIR, reqPath);
 
   if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
     filePath = path.join(filePath, 'index.html');

@@ -9,7 +9,7 @@ const assert = require('assert');
 console.log('🧪 Starting Roll & Dip Test Suite...\n');
 
 // 1. Test Seed Data
-const seedPath = path.resolve(__dirname, '../vercel-deploy/public/js/menu-seed-data.js');
+const seedPath = path.resolve(__dirname, '../js/menu-seed-data.js');
 assert.ok(fs.existsSync(seedPath), 'menu-seed-data.js must exist');
 const seedContent = fs.readFileSync(seedPath, 'utf8');
 
@@ -81,8 +81,8 @@ assert.strictEqual(milkshakesSec.section_number, '08', 'Milkshakes must be secti
 console.log('✅ Milk Shakes layout-balanced configuration verified');
 
 // 3. Test Assets
-const logoPath = path.resolve(__dirname, '../vercel-deploy/public/assets/logo.png');
-const qrPath = path.resolve(__dirname, '../vercel-deploy/public/assets/qr.png');
+const logoPath = path.resolve(__dirname, '../assets/logo.png');
+const qrPath = path.resolve(__dirname, '../assets/qr.png');
 assert.ok(fs.existsSync(logoPath), 'logo.png must exist');
 assert.ok(fs.existsSync(qrPath), 'qr.png must exist');
 assert.ok(fs.statSync(logoPath).size > 10000, 'logo.png must be non-empty valid image');
@@ -106,10 +106,10 @@ assert.ok(schemaSql.includes('ENABLE ROW LEVEL SECURITY'), 'Must enable RLS');
 console.log('✅ Supabase Migrations & RLS DDL Verified');
 
 // 5. Test Public & Admin HTML Files
-const publicHtmlPath = path.resolve(__dirname, '../vercel-deploy/public/index.html');
-const adminHtmlPath = path.resolve(__dirname, '../vercel-deploy/public/admin/index.html');
-assert.ok(fs.existsSync(publicHtmlPath), 'public/index.html must exist');
-assert.ok(fs.existsSync(adminHtmlPath), 'public/admin/index.html must exist');
+const publicHtmlPath = path.resolve(__dirname, '../index.html');
+const adminHtmlPath = path.resolve(__dirname, '../admin/index.html');
+assert.ok(fs.existsSync(publicHtmlPath), 'index.html must exist at repository root');
+assert.ok(fs.existsSync(adminHtmlPath), 'admin/index.html must exist');
 
 const publicHtml = fs.readFileSync(publicHtmlPath, 'utf8');
 assert.ok(publicHtml.includes('href="#milkshakes"'), 'Navigation must include link to #milkshakes');
