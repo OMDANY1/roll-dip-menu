@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roll & Dip — Artisan Cinnamon Rolls & Café</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- ─── STICKY NAV ─── -->
+  <nav class="nav" aria-label="Menu navigation">
+    <div class="nav-inner">
+      <a class="nav-logo" href="#top" aria-label="Roll & Dip home">
+        <img src="/assets/logo.png" width="1349" height="331" alt="Roll & Dip">
+      </a>
+      <ul class="nav-links">
+        <li><a href="#freshly-rolled">Rolls</a></li>
+        <li><a href="#mini-rolls">Mini Rolls</a></li>
+        <li><a href="#sweet-bites">Bites &amp; Extras</a></li>
+        <li><a href="#better-together">Pairings</a></li>
+        <li><a href="#warm-cups">Warm Cups</a></li>
+        <li><a href="#sparkling-cups">Sparkling</a></li>
+        <li><a href="#cold-cups">Cold Cups</a></li>
+        <li><a href="#milkshakes">Shakes</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ─── HERO ─── -->
+  <section class="hero" id="top" aria-label="Welcome">
+    <div class="hero-bg-circle"></div>
+
+    <img class="hero-logo" src="/assets/logo.png" width="1349" height="331" alt="Roll & Dip">
+    <p class="hero-eyebrow">Artisan Cinnamon Rolls &amp; Café</p>
+
+    <div class="hero-divider" aria-hidden="true"></div>
+
+    <p class="hero-subtitle">Fresh rolls, sweet dips, warm coffee, and cold sips made daily.</p>
+
+    <div class="hero-scroll" aria-hidden="true">
+      <span>Explore</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ─── MAIN CONTENT (DYNMIC DATA-DRIVEN MENU SECTIONS) ─── -->
+  <main class="main" id="main-menu"></main>
+
+  <!-- ─── FOOTER ─── -->
+  <footer class="footer" aria-label="Footer branding">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img class="footer-logo-img" src="/assets/logo.png" width="1349" height="331" alt="Roll & Dip">
+        <h2 class="footer-title">Something warm is rolling your way.</h2>
+        <p class="footer-tagline">Made Fresh Daily, With Love</p>
+        <div class="footer-divider" aria-hidden="true"></div>
+        <p class="footer-handle">@rolldip1</p>
+        <p class="footer-social">Scan the code to follow the latest rolls and drops.</p>
+      </div>
+      <div class="footer-qr-card" aria-label="Scan and follow Roll & Dip">
+        <img src="/assets/qr.png" width="96" height="96" alt="Roll & Dip scan and follow QR code">
+        <span class="footer-qr-label">Scan &amp; Follow</span>
+      </div>
+      <p class="footer-copy">&copy; Roll &amp; Dip — All rights reserved</p>
+    </div>
+  </footer>
+
+  <!-- ─── SCRIPTS ─── -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/supabase-client.js"></script>
+  <script src="/js/menu-seed-data.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
