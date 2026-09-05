@@ -31,14 +31,50 @@
     userEmailDisplay: document.getElementById('user-email-display'),
     logoutBtn: document.getElementById('logout-btn'),
     configBtn: document.getElementById('config-btn'),
+
+    // Mobile Header & Drawer
+    mobileMenuToggle: document.getElementById('mobile-menu-toggle'),
+    mobileDrawer: document.getElementById('mobile-drawer'),
+    mobileEmailDisplay: document.getElementById('mobile-email-display'),
+    mobileConfigBtn: document.getElementById('mobile-config-btn'),
+    mobileLogoutBtn: document.getElementById('mobile-logout-btn'),
+
+    // Category Sidebar & Navigation
+    categoriesCountBadge: document.getElementById('categories-count-badge'),
     sectionsNav: document.getElementById('sections-nav'),
-    groupTabs: document.getElementById('group-tabs'),
+    addCategoryBtn: document.getElementById('add-category-btn'),
+    addCategorySidebarBtn: document.getElementById('add-category-sidebar-btn'),
+
+    // Category Header Card & Actions Dropdown
     sectionTitle: document.getElementById('section-title'),
     sectionMeta: document.getElementById('section-meta'),
-    searchInput: document.getElementById('search-input'),
+    sectionStatusPill: document.getElementById('section-status-pill'),
+    sectionItemsPill: document.getElementById('section-items-pill'),
+    sectionIntro: document.getElementById('section-intro'),
     addItemBtn: document.getElementById('add-item-btn'),
+    categoryActionsBtn: document.getElementById('category-actions-btn'),
+    categoryActionsMenu: document.getElementById('category-actions-menu'),
+    editCategoryBtn: document.getElementById('edit-category-btn'),
+    categoryToggleVisBtn: document.getElementById('category-toggle-vis-btn'),
+    categoryToggleVisLabel: document.getElementById('category-toggle-vis-label'),
+    categoryMoveUpBtn: document.getElementById('category-move-up-btn'),
+    categoryMoveDownBtn: document.getElementById('category-move-down-btn'),
+    deleteCategoryBtn: document.getElementById('delete-category-btn'),
+
+    // Subsections / Group Tabs
+    groupTabs: document.getElementById('group-tabs'),
+
+    // Products Card (Toolbar, Table, Mobile Cards, Empty State)
+    searchInput: document.getElementById('search-input'),
+    toolbarItemsCount: document.getElementById('toolbar-items-count'),
     itemsTableBody: document.getElementById('items-table-body'),
+    itemsCardsMobile: document.getElementById('items-cards-mobile'),
     emptyState: document.getElementById('empty-state'),
+    emptyStateTitle: document.getElementById('empty-state-title'),
+    emptyStateDesc: document.getElementById('empty-state-desc'),
+    emptyAddItemBtn: document.getElementById('empty-add-item-btn'),
+
+    // Item Modal
     itemModal: document.getElementById('item-modal'),
     itemModalTitle: document.getElementById('item-modal-title'),
     itemForm: document.getElementById('item-form'),
@@ -52,26 +88,15 @@
     itemActiveCheck: document.getElementById('item-active-check'),
     itemModalClose: document.getElementById('item-modal-close'),
     itemModalCancel: document.getElementById('item-modal-cancel'),
+
+    // Delete Item Modal
     deleteModal: document.getElementById('delete-modal'),
     deleteItemName: document.getElementById('delete-item-name'),
     deleteConfirmBtn: document.getElementById('delete-confirm-btn'),
     deleteCancelBtn: document.getElementById('delete-cancel-btn'),
     deleteModalClose: document.getElementById('delete-modal-close'),
-    configModal: document.getElementById('config-modal'),
-    configUrlInput: document.getElementById('config-url-input'),
-    configAnonInput: document.getElementById('config-anon-input'),
-    configSaveBtn: document.getElementById('config-save-btn'),
-    configModalClose: document.getElementById('config-modal-close'),
-    configModalCancel: document.getElementById('config-modal-cancel'),
-    configPromptBtn: document.getElementById('config-prompt-btn'),
-    // Category Management Elements
-    addCategoryBtn: document.getElementById('add-category-btn'),
-    editCategoryBtn: document.getElementById('edit-category-btn'),
-    categoryMoveUpBtn: document.getElementById('category-move-up-btn'),
-    categoryMoveDownBtn: document.getElementById('category-move-down-btn'),
-    categoryToggleVisBtn: document.getElementById('category-toggle-vis-btn'),
-    deleteCategoryBtn: document.getElementById('delete-category-btn'),
-    sectionIntro: document.getElementById('section-intro'),
+
+    // Add Category Modal
     addCategoryModal: document.getElementById('add-category-modal'),
     addCategoryForm: document.getElementById('add-category-form'),
     newCategoryName: document.getElementById('new-category-name'),
@@ -79,13 +104,18 @@
     newCategoryIntro: document.getElementById('new-category-intro'),
     addCategoryClose: document.getElementById('add-category-close'),
     addCategoryCancel: document.getElementById('add-category-cancel'),
+
+    // Edit Category Modal
     editCategoryModal: document.getElementById('edit-category-modal'),
+    editCategoryModalTitle: document.getElementById('edit-category-modal-title'),
     editCategoryForm: document.getElementById('edit-category-form'),
     editCategoryName: document.getElementById('edit-category-name'),
     editCategoryTag: document.getElementById('edit-category-tag'),
     editCategoryIntro: document.getElementById('edit-category-intro'),
     editCategoryClose: document.getElementById('edit-category-close'),
     editCategoryCancel: document.getElementById('edit-category-cancel'),
+
+    // Delete Category Modal
     deleteCategoryModal: document.getElementById('delete-category-modal'),
     deleteCategoryBlocked: document.getElementById('delete-category-blocked'),
     deleteCategoryBlockedMsg: document.getElementById('delete-category-blocked-msg'),
@@ -93,7 +123,16 @@
     deleteCategoryTargetName: document.getElementById('delete-category-target-name'),
     deleteCategoryClose: document.getElementById('delete-category-close'),
     deleteCategoryCancel: document.getElementById('delete-category-cancel'),
-    deleteCategoryConfirm: document.getElementById('delete-category-confirm')
+    deleteCategoryConfirm: document.getElementById('delete-category-confirm'),
+
+    // Config Modal
+    configModal: document.getElementById('config-modal'),
+    configUrlInput: document.getElementById('config-url-input'),
+    configAnonInput: document.getElementById('config-anon-input'),
+    configSaveBtn: document.getElementById('config-save-btn'),
+    configModalClose: document.getElementById('config-modal-close'),
+    configModalCancel: document.getElementById('config-modal-cancel'),
+    configPromptBtn: document.getElementById('config-prompt-btn')
   };
 
   // Toast notification helper
@@ -180,7 +219,168 @@
     if (els.userEmailDisplay && state.user) {
       els.userEmailDisplay.textContent = state.user.email || 'Admin';
     }
+    if (els.mobileEmailDisplay && state.user) {
+      els.mobileEmailDisplay.textContent = state.user.email || 'Admin';
+    }
   }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // MODAL UTILITIES (Air-tight hidden state & accessible behavior)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  function openModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.removeAttribute('hidden');
+    modalEl.setAttribute('aria-hidden', 'false');
+    modalEl.style.display = 'flex';
+    requestAnimationFrame(() => {
+      modalEl.classList.add('show');
+    });
+  }
+
+  function closeModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.classList.remove('show');
+    modalEl.setAttribute('aria-hidden', 'true');
+    modalEl.setAttribute('hidden', '');
+    modalEl.style.display = 'none';
+  }
+
+  function closeAllModals() {
+    closeItemModal();
+    closeDeleteModal();
+    closeAddCategoryModal();
+    closeEditCategoryModal();
+    closeDeleteCategoryModal();
+    closeConfigModal();
+  }
+
+  // Backdrop click listener on all modals
+  [
+    els.itemModal,
+    els.deleteModal,
+    els.addCategoryModal,
+    els.editCategoryModal,
+    els.deleteCategoryModal,
+    els.configModal
+  ].forEach(modal => {
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          closeAllModals();
+        }
+      });
+    }
+  });
+
+  // Global Escape key closes modals, dropdowns, and drawers
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAllModals();
+      closeCategoryDropdown();
+      closeMobileDrawer();
+    }
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // MOBILE DRAWER
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  function toggleMobileDrawer(e) {
+    if (e) e.stopPropagation();
+    if (!els.mobileDrawer) return;
+    const isHidden = els.mobileDrawer.hasAttribute('hidden');
+    if (isHidden) {
+      openMobileDrawer();
+    } else {
+      closeMobileDrawer();
+    }
+  }
+
+  function openMobileDrawer() {
+    if (!els.mobileDrawer) return;
+    els.mobileDrawer.removeAttribute('hidden');
+    els.mobileDrawer.setAttribute('aria-hidden', 'false');
+    if (els.mobileMenuToggle) {
+      els.mobileMenuToggle.setAttribute('aria-expanded', 'true');
+      els.mobileMenuToggle.classList.add('is-active');
+    }
+  }
+
+  function closeMobileDrawer() {
+    if (!els.mobileDrawer) return;
+    els.mobileDrawer.setAttribute('hidden', '');
+    els.mobileDrawer.setAttribute('aria-hidden', 'true');
+    if (els.mobileMenuToggle) {
+      els.mobileMenuToggle.setAttribute('aria-expanded', 'false');
+      els.mobileMenuToggle.classList.remove('is-active');
+    }
+  }
+
+  if (els.mobileMenuToggle) {
+    els.mobileMenuToggle.addEventListener('click', toggleMobileDrawer);
+  }
+  if (els.mobileConfigBtn) {
+    els.mobileConfigBtn.addEventListener('click', () => {
+      closeMobileDrawer();
+      openConfigModal();
+    });
+  }
+  if (els.mobileLogoutBtn) {
+    els.mobileLogoutBtn.addEventListener('click', async () => {
+      closeMobileDrawer();
+      const client = window.RollDipSupabase ? window.RollDipSupabase.getClient() : null;
+      if (client) {
+        await client.auth.signOut();
+      }
+      state.user = null;
+      showToast('Signed out successfully', 'info');
+      showAuthView();
+    });
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // CATEGORY ACTIONS DROPDOWN
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  function toggleCategoryDropdown(e) {
+    if (e) e.stopPropagation();
+    if (!els.categoryActionsMenu) return;
+    const isHidden = els.categoryActionsMenu.hasAttribute('hidden');
+    if (isHidden) {
+      openCategoryDropdown();
+    } else {
+      closeCategoryDropdown();
+    }
+  }
+
+  function openCategoryDropdown() {
+    if (!els.categoryActionsMenu) return;
+    els.categoryActionsMenu.removeAttribute('hidden');
+    els.categoryActionsMenu.setAttribute('aria-hidden', 'false');
+    if (els.categoryActionsBtn) els.categoryActionsBtn.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeCategoryDropdown() {
+    if (!els.categoryActionsMenu) return;
+    els.categoryActionsMenu.setAttribute('hidden', '');
+    els.categoryActionsMenu.setAttribute('aria-hidden', 'true');
+    if (els.categoryActionsBtn) els.categoryActionsBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  if (els.categoryActionsBtn) {
+    els.categoryActionsBtn.addEventListener('click', toggleCategoryDropdown);
+  }
+
+  // Click outside to dismiss dropdowns and drawers
+  document.addEventListener('click', (e) => {
+    if (els.categoryActionsMenu && !els.categoryActionsMenu.contains(e.target) && e.target !== els.categoryActionsBtn && !els.categoryActionsBtn?.contains(e.target)) {
+      closeCategoryDropdown();
+    }
+    if (els.mobileDrawer && !els.mobileDrawer.contains(e.target) && e.target !== els.mobileMenuToggle && !els.mobileMenuToggle?.contains(e.target)) {
+      closeMobileDrawer();
+    }
+  });
 
   /**
    * Login Form Submit
@@ -268,11 +468,15 @@
   }
 
   /**
-   * Render Section Navigation Tabs
+   * Render Section Navigation Tabs (Sidebar & Mobile Chips)
    */
   function renderSectionsNav() {
     if (!els.sectionsNav) return;
     els.sectionsNav.innerHTML = '';
+
+    if (els.categoriesCountBadge) {
+      els.categoriesCountBadge.textContent = state.sections.length;
+    }
 
     state.sections.forEach(sec => {
       const secKey = sec.id || sec.slug;
@@ -291,11 +495,17 @@
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = `section-tab-btn ${isActive ? 'active' : ''} ${!isVisible ? 'is-inactive' : ''}`;
+      btn.setAttribute('data-id', secKey);
+      btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
       btn.innerHTML = `
-        <span class="tab-num">${escapeHtml(sec.section_number)}</span>
-        <span>${escapeHtml(sec.title_plain)}</span>
-        ${!isVisible ? '<span class="tab-hidden-badge">Hidden</span>' : ''}
-        <span class="tab-count">${activeItems}/${totalItems}</span>
+        <div class="tab-btn-content">
+          <span class="tab-num">${escapeHtml(sec.section_number)}</span>
+          <span class="tab-title">${escapeHtml(sec.title_plain)}</span>
+        </div>
+        <div class="tab-badges">
+          ${!isVisible ? '<span class="tab-hidden-badge">Hidden</span>' : ''}
+          <span class="tab-count">${activeItems}/${totalItems}</span>
+        </div>
       `;
 
       btn.addEventListener('click', () => {
@@ -314,27 +524,52 @@
    */
   function renderCurrentSection() {
     const currentSection = state.sections.find(s => (s.id || s.slug) === state.activeSectionId);
-    if (!currentSection) return;
+    if (!currentSection) {
+      if (els.sectionTitle) els.sectionTitle.textContent = 'No Category Selected';
+      if (els.itemsTableBody) els.itemsTableBody.innerHTML = '';
+      if (els.itemsCardsMobile) els.itemsCardsMobile.innerHTML = '';
+      if (els.emptyState) els.emptyState.style.display = 'flex';
+      return;
+    }
 
-    // Header info
+    // Category Header info
     if (els.sectionTitle) {
       els.sectionTitle.textContent = currentSection.title_plain;
     }
     if (els.sectionMeta) {
-      const tag = currentSection.tag ? `[${currentSection.tag}] ` : '';
-      const layout = `Layout: ${currentSection.layout_type || 'default'}`;
-      const statusText = currentSection.is_active !== false ? 'Active' : 'Hidden';
-      els.sectionMeta.textContent = `${tag}Section ${currentSection.section_number} • ${layout} • ${statusText}`;
+      const tag = currentSection.tag ? `${currentSection.tag} • ` : '';
+      els.sectionMeta.textContent = `${tag}Section ${currentSection.section_number}`;
     }
-    if (els.sectionIntro) {
-      els.sectionIntro.textContent = currentSection.introduction || '';
+    if (els.sectionStatusPill) {
+      const isVis = currentSection.is_active !== false;
+      els.sectionStatusPill.className = `status-chip ${isVis ? 'is-active' : 'is-hidden'}`;
+      els.sectionStatusPill.textContent = isVis ? '● Active' : '● Hidden';
     }
 
-    // Update Category Visibility button
-    if (els.categoryToggleVisBtn) {
+    // Count items in current section
+    let totalItemsInSection = 0;
+    (currentSection.groups || []).forEach(g => {
+      totalItemsInSection += (g.items || []).length;
+    });
+
+    if (els.sectionItemsPill) {
+      els.sectionItemsPill.textContent = `${totalItemsInSection} Item${totalItemsInSection === 1 ? '' : 's'}`;
+    }
+
+    if (els.sectionIntro) {
+      if (currentSection.introduction && currentSection.introduction.trim()) {
+        els.sectionIntro.textContent = currentSection.introduction;
+        els.sectionIntro.style.display = 'block';
+      } else {
+        els.sectionIntro.textContent = '';
+        els.sectionIntro.style.display = 'none';
+      }
+    }
+
+    // Update Category Visibility dropdown action label
+    if (els.categoryToggleVisLabel) {
       const isVis = currentSection.is_active !== false;
-      els.categoryToggleVisBtn.innerHTML = isVis ? '👁️ Active' : '👁️‍🗨️ Hidden';
-      els.categoryToggleVisBtn.title = isVis ? 'Click to hide this category from public menu' : 'Click to make this category visible on public menu';
+      els.categoryToggleVisLabel.textContent = isVis ? 'Hide Category' : 'Show Category';
     }
 
     // Update Category Reorder buttons (disable if at boundaries)
@@ -379,6 +614,10 @@
       );
     }
 
+    if (els.toolbarItemsCount) {
+      els.toolbarItemsCount.textContent = `${itemsToDisplay.length} menu item${itemsToDisplay.length === 1 ? '' : 's'}`;
+    }
+
     renderItemsTable(itemsToDisplay, currentSection);
   }
 
@@ -391,8 +630,11 @@
 
     if (groups.length <= 1) {
       els.groupTabs.innerHTML = '';
+      els.groupTabs.style.display = 'none';
       return;
     }
+
+    els.groupTabs.style.display = 'flex';
 
     let html = `
       <button type="button" class="group-tab-btn ${state.activeGroupId === null ? 'active' : ''}" data-group="all">
@@ -423,22 +665,33 @@
   }
 
   /**
-   * Render Items Table
+   * Render Items Table (Desktop Table + Mobile Cards)
    */
   function renderItemsTable(items, currentSection) {
-    if (!els.itemsTableBody) return;
-    els.itemsTableBody.innerHTML = '';
+    if (els.itemsTableBody) els.itemsTableBody.innerHTML = '';
+    if (els.itemsCardsMobile) els.itemsCardsMobile.innerHTML = '';
 
     if (items.length === 0) {
-      if (els.emptyState) els.emptyState.style.display = 'block';
+      if (els.emptyState) {
+        els.emptyState.style.display = 'flex';
+        if (state.searchQuery.trim()) {
+          if (els.emptyStateTitle) els.emptyStateTitle.textContent = 'No matching items found';
+          if (els.emptyStateDesc) els.emptyStateDesc.textContent = `No items found matching "${state.searchQuery}". Try clearing your search keyword.`;
+          if (els.emptyAddItemBtn) els.emptyAddItemBtn.style.display = 'none';
+        } else {
+          if (els.emptyStateTitle) els.emptyStateTitle.textContent = 'No items in this category yet';
+          if (els.emptyStateDesc) els.emptyStateDesc.textContent = 'Add your first menu item to start building this category.';
+          if (els.emptyAddItemBtn) els.emptyAddItemBtn.style.display = 'inline-flex';
+        }
+      }
       return;
     }
 
     if (els.emptyState) els.emptyState.style.display = 'none';
 
     items.forEach((item, index) => {
-      const tr = document.createElement('tr');
-      tr.className = `item-row ${item.is_active ? 'is-active' : 'is-hidden'}`;
+      const isFirst = index === 0;
+      const isLast = index === items.length - 1;
 
       const priceDisplay = item.price !== null && item.price !== undefined
         ? `<span class="price-text">${escapeHtml(item.price)} ${escapeHtml(item.currency || 'LE')}</span>`
@@ -452,80 +705,127 @@
         ? `<span class="item-desc-text">${escapeHtml(item.description)}</span>`
         : '';
 
-      const isFirst = index === 0;
-      const isLast = index === items.length - 1;
+      // ─── 1. Desktop Table Row (>= 768px) ───
+      if (els.itemsTableBody) {
+        const tr = document.createElement('tr');
+        tr.className = `item-row ${item.is_active ? 'is-active' : 'is-hidden'}`;
+        tr.innerHTML = `
+          <td style="width: 54px; text-align: center;">
+            <div class="reorder-controls">
+              <button type="button" class="btn-icon-move" data-action="up" title="Move Up" ${isFirst ? 'disabled' : ''}>▲</button>
+              <button type="button" class="btn-icon-move" data-action="down" title="Move Down" ${isLast ? 'disabled' : ''}>▼</button>
+            </div>
+          </td>
+          <td style="width: 46px; text-align: center; color: var(--warm-mid); font-size: 0.8rem;">
+            #${item.sort_order || (index + 1)}
+          </td>
+          <td>
+            <div class="item-title-cell">
+              <span>${escapeHtml(item.name)}</span>
+              ${badgeDisplay}
+            </div>
+            ${descDisplay}
+            ${currentSection.groups.length > 1 ? `<div style="font-size: 0.72rem; color: var(--caramel); margin-top: 2px;">📂 ${escapeHtml(item._groupTitle)}</div>` : ''}
+          </td>
+          <td style="white-space: nowrap;">
+            ${priceDisplay}
+          </td>
+          <td style="width: 110px; text-align: center;">
+            <label class="switch" title="${item.is_active ? 'Visible on menu' : 'Hidden from menu'}">
+              <input type="checkbox" class="visibility-toggle" ${item.is_active ? 'checked' : ''}>
+              <span class="slider"></span>
+            </label>
+          </td>
+          <td style="width: 140px; text-align: right;">
+            <div class="row-actions">
+              <button type="button" class="btn btn-secondary btn-sm edit-btn" title="Edit Item">
+                ✏️ Edit
+              </button>
+              <button type="button" class="btn btn-danger btn-sm delete-btn" title="Delete Item">
+                🗑️
+              </button>
+            </div>
+          </td>
+        `;
 
-      tr.innerHTML = `
-        <td style="width: 50px; text-align: center;">
-          <div class="reorder-controls">
-            <button type="button" class="btn-icon-move" data-action="up" title="Move Up" ${isFirst ? 'disabled' : ''}>▲</button>
-            <button type="button" class="btn-icon-move" data-action="down" title="Move Down" ${isLast ? 'disabled' : ''}>▼</button>
+        // Row listeners
+        const upBtn = tr.querySelector('[data-action="up"]');
+        if (upBtn) upBtn.addEventListener('click', () => handleReorder(item, items, -1));
+
+        const downBtn = tr.querySelector('[data-action="down"]');
+        if (downBtn) downBtn.addEventListener('click', () => handleReorder(item, items, 1));
+
+        const toggle = tr.querySelector('.visibility-toggle');
+        if (toggle) toggle.addEventListener('change', () => handleToggleVisibility(item, toggle.checked));
+
+        const editBtn = tr.querySelector('.edit-btn');
+        if (editBtn) editBtn.addEventListener('click', () => openItemModal(item, currentSection));
+
+        const deleteBtn = tr.querySelector('.delete-btn');
+        if (deleteBtn) deleteBtn.addEventListener('click', () => openDeleteModal(item));
+
+        els.itemsTableBody.appendChild(tr);
+      }
+
+      // ─── 2. Mobile Card View (< 768px) ───
+      if (els.itemsCardsMobile) {
+        const card = document.createElement('div');
+        card.className = `item-mobile-card ${item.is_active ? '' : 'is-hidden'}`;
+        card.innerHTML = `
+          <div class="item-card-top">
+            <div>
+              <div class="item-card-title-group">
+                <span class="item-card-name">${escapeHtml(item.name)}</span>
+                ${badgeDisplay}
+              </div>
+              ${descDisplay ? `<div class="item-card-desc">${escapeHtml(item.description)}</div>` : ''}
+              ${currentSection.groups.length > 1 ? `<div class="item-card-subgroup">📂 ${escapeHtml(item._groupTitle)}</div>` : ''}
+            </div>
+            <div class="item-card-price">
+              ${priceDisplay}
+            </div>
           </div>
-        </td>
-        <td style="width: 45px; text-align: center; color: var(--warm-mid); font-size: 0.8rem;">
-          #${item.sort_order || (index + 1)}
-        </td>
-        <td>
-          <div class="item-title-cell">
-            <span>${escapeHtml(item.name)}</span>
-            ${badgeDisplay}
+
+          <div class="item-card-bottom">
+            <label class="item-card-toggle" title="${item.is_active ? 'Visible on menu' : 'Hidden from menu'}">
+              <input type="checkbox" class="mobile-visibility-toggle" ${item.is_active ? 'checked' : ''}>
+              <span class="toggle-slider"></span>
+              <span class="toggle-label">${item.is_active ? 'Visible' : 'Hidden'}</span>
+            </label>
+
+            <div class="item-card-actions">
+              <div class="card-reorder">
+                <button type="button" class="btn-icon-move" data-action="up" title="Move Up" ${isFirst ? 'disabled' : ''}>▲</button>
+                <button type="button" class="btn-icon-move" data-action="down" title="Move Down" ${isLast ? 'disabled' : ''}>▼</button>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm mobile-edit-btn" title="Edit Item">
+                ✏️ Edit
+              </button>
+              <button type="button" class="btn btn-danger btn-sm mobile-delete-btn" title="Delete Item">
+                🗑️
+              </button>
+            </div>
           </div>
-          ${descDisplay}
-          ${currentSection.groups.length > 1 ? `<div style="font-size: 0.7rem; color: var(--caramel); margin-top: 2px;">📂 ${escapeHtml(item._groupTitle)}</div>` : ''}
-        </td>
-        <td style="white-space: nowrap;">
-          ${priceDisplay}
-        </td>
-        <td style="width: 90px; text-align: center;">
-          <label class="switch" title="${item.is_active ? 'Visible on menu' : 'Hidden from menu'}">
-            <input type="checkbox" class="visibility-toggle" ${item.is_active ? 'checked' : ''}>
-            <span class="slider"></span>
-          </label>
-        </td>
-        <td style="width: 140px;">
-          <div class="row-actions">
-            <button type="button" class="btn btn-secondary btn-sm edit-btn" title="Edit Item">
-              ✏️ Edit
-            </button>
-            <button type="button" class="btn btn-danger btn-sm delete-btn" title="Delete Item">
-              🗑️
-            </button>
-          </div>
-        </td>
-      `;
+        `;
 
-      // Event Listeners for Row Actions
-      // 1. Move Up
-      const upBtn = tr.querySelector('[data-action="up"]');
-      if (upBtn) {
-        upBtn.addEventListener('click', () => handleReorder(item, items, -1));
+        // Card listeners
+        const mUpBtn = card.querySelector('[data-action="up"]');
+        if (mUpBtn) mUpBtn.addEventListener('click', () => handleReorder(item, items, -1));
+
+        const mDownBtn = card.querySelector('[data-action="down"]');
+        if (mDownBtn) mDownBtn.addEventListener('click', () => handleReorder(item, items, 1));
+
+        const mToggle = card.querySelector('.mobile-visibility-toggle');
+        if (mToggle) mToggle.addEventListener('change', () => handleToggleVisibility(item, mToggle.checked));
+
+        const mEditBtn = card.querySelector('.mobile-edit-btn');
+        if (mEditBtn) mEditBtn.addEventListener('click', () => openItemModal(item, currentSection));
+
+        const mDeleteBtn = card.querySelector('.mobile-delete-btn');
+        if (mDeleteBtn) mDeleteBtn.addEventListener('click', () => openDeleteModal(item));
+
+        els.itemsCardsMobile.appendChild(card);
       }
-
-      // 2. Move Down
-      const downBtn = tr.querySelector('[data-action="down"]');
-      if (downBtn) {
-        downBtn.addEventListener('click', () => handleReorder(item, items, 1));
-      }
-
-      // 3. Visibility Toggle
-      const toggle = tr.querySelector('.visibility-toggle');
-      if (toggle) {
-        toggle.addEventListener('change', () => handleToggleVisibility(item, toggle.checked));
-      }
-
-      // 4. Edit
-      const editBtn = tr.querySelector('.edit-btn');
-      if (editBtn) {
-        editBtn.addEventListener('click', () => openItemModal(item, currentSection));
-      }
-
-      // 5. Delete
-      const deleteBtn = tr.querySelector('.delete-btn');
-      if (deleteBtn) {
-        deleteBtn.addEventListener('click', () => openDeleteModal(item));
-      }
-
-      els.itemsTableBody.appendChild(tr);
     });
   }
 
@@ -662,8 +962,8 @@
       els.itemActiveCheck.checked = true;
     }
 
-    els.itemModal.classList.add('show');
-    els.itemNameInput.focus();
+    openModal(els.itemModal);
+    setTimeout(() => els.itemNameInput && els.itemNameInput.focus(), 80);
   }
 
   function updateGroupDropdown() {
@@ -695,7 +995,7 @@
   }
 
   function closeItemModal() {
-    if (els.itemModal) els.itemModal.classList.remove('show');
+    closeModal(els.itemModal);
     state.editingItem = null;
   }
 
@@ -704,6 +1004,9 @@
 
   if (els.addItemBtn) {
     els.addItemBtn.addEventListener('click', () => openItemModal(null, null));
+  }
+  if (els.emptyAddItemBtn) {
+    els.emptyAddItemBtn.addEventListener('click', () => openItemModal(null, null));
   }
 
   /**
@@ -808,13 +1111,11 @@
     if (els.deleteItemName) {
       els.deleteItemName.textContent = item.name;
     }
-    if (els.deleteModal) {
-      els.deleteModal.classList.add('show');
-    }
+    openModal(els.deleteModal);
   }
 
   function closeDeleteModal() {
-    if (els.deleteModal) els.deleteModal.classList.remove('show');
+    closeModal(els.deleteModal);
     state.deletingItem = null;
   }
 
@@ -854,16 +1155,14 @@
    * API Config Modal (Supabase Credentials setup helper)
    */
   function openConfigModal() {
-    if (els.configModal) {
-      const config = window.RollDipSupabase ? window.RollDipSupabase.getConfig() : { url: '', anonKey: '' };
-      if (els.configUrlInput) els.configUrlInput.value = config.url || '';
-      if (els.configAnonInput) els.configAnonInput.value = config.anonKey || '';
-      els.configModal.classList.add('show');
-    }
+    const config = window.RollDipSupabase ? window.RollDipSupabase.getConfig() : { url: '', anonKey: '' };
+    if (els.configUrlInput) els.configUrlInput.value = config.url || '';
+    if (els.configAnonInput) els.configAnonInput.value = config.anonKey || '';
+    openModal(els.configModal);
   }
 
   function closeConfigModal() {
-    if (els.configModal) els.configModal.classList.remove('show');
+    closeModal(els.configModal);
   }
 
   if (els.configBtn) els.configBtn.addEventListener('click', openConfigModal);
@@ -945,17 +1244,16 @@
     if (els.newCategoryName) els.newCategoryName.value = '';
     if (els.newCategoryTag) els.newCategoryTag.value = '';
     if (els.newCategoryIntro) els.newCategoryIntro.value = '';
-    if (els.addCategoryModal) {
-      els.addCategoryModal.classList.add('show');
-      setTimeout(() => els.newCategoryName && els.newCategoryName.focus(), 100);
-    }
+    openModal(els.addCategoryModal);
+    setTimeout(() => els.newCategoryName && els.newCategoryName.focus(), 80);
   }
 
   function closeAddCategoryModal() {
-    if (els.addCategoryModal) els.addCategoryModal.classList.remove('show');
+    closeModal(els.addCategoryModal);
   }
 
   if (els.addCategoryBtn) els.addCategoryBtn.addEventListener('click', openAddCategoryModal);
+  if (els.addCategorySidebarBtn) els.addCategorySidebarBtn.addEventListener('click', openAddCategoryModal);
   if (els.addCategoryClose) els.addCategoryClose.addEventListener('click', closeAddCategoryModal);
   if (els.addCategoryCancel) els.addCategoryCancel.addEventListener('click', closeAddCategoryModal);
 
@@ -1057,17 +1355,20 @@
     if (els.editCategoryTag) els.editCategoryTag.value = currentSection.tag || '';
     if (els.editCategoryIntro) els.editCategoryIntro.value = currentSection.introduction || '';
 
-    if (els.editCategoryModal) {
-      els.editCategoryModal.classList.add('show');
-      setTimeout(() => els.editCategoryName && els.editCategoryName.focus(), 100);
-    }
+    openModal(els.editCategoryModal);
+    setTimeout(() => els.editCategoryName && els.editCategoryName.focus(), 80);
   }
 
   function closeEditCategoryModal() {
-    if (els.editCategoryModal) els.editCategoryModal.classList.remove('show');
+    closeModal(els.editCategoryModal);
   }
 
-  if (els.editCategoryBtn) els.editCategoryBtn.addEventListener('click', openEditCategoryModal);
+  if (els.editCategoryBtn) {
+    els.editCategoryBtn.addEventListener('click', () => {
+      closeCategoryDropdown();
+      openEditCategoryModal();
+    });
+  }
   if (els.editCategoryClose) els.editCategoryClose.addEventListener('click', closeEditCategoryModal);
   if (els.editCategoryCancel) els.editCategoryCancel.addEventListener('click', closeEditCategoryModal);
 
@@ -1132,6 +1433,7 @@
   // 3. Toggle Category Visibility
   if (els.categoryToggleVisBtn) {
     els.categoryToggleVisBtn.addEventListener('click', async () => {
+      closeCategoryDropdown();
       const currentSection = state.sections.find(s => (s.id || s.slug) === state.activeSectionId);
       if (!currentSection) return;
 
@@ -1167,6 +1469,7 @@
 
   // 4. Reorder Category (Move Up / Down)
   async function moveCategory(direction) {
+    closeCategoryDropdown();
     const idx = state.sections.findIndex(s => (s.id || s.slug) === state.activeSectionId);
     if (idx === -1) return;
     const targetIdx = idx + direction;
@@ -1230,6 +1533,7 @@
   let categoryPendingDelete = null;
 
   function openDeleteCategoryModal() {
+    closeCategoryDropdown();
     const currentSection = state.sections.find(s => (s.id || s.slug) === state.activeSectionId);
     if (!currentSection) return;
 
@@ -1256,13 +1560,11 @@
       if (els.deleteCategoryConfirm) els.deleteCategoryConfirm.style.display = 'inline-block';
     }
 
-    if (els.deleteCategoryModal) {
-      els.deleteCategoryModal.classList.add('show');
-    }
+    openModal(els.deleteCategoryModal);
   }
 
   function closeDeleteCategoryModal() {
-    if (els.deleteCategoryModal) els.deleteCategoryModal.classList.remove('show');
+    closeModal(els.deleteCategoryModal);
     categoryPendingDelete = null;
   }
 
