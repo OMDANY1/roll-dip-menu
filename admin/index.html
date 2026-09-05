@@ -71,14 +71,39 @@
 
     <!-- Main Admin Container -->
     <main class="admin-container">
-      <!-- Section Navigation Tabs -->
-      <nav class="sections-nav" id="sections-nav" aria-label="Menu Sections"></nav>
+      <!-- Section Navigation Tabs & Add Category -->
+      <div class="sections-nav-wrapper">
+        <nav class="sections-nav" id="sections-nav" aria-label="Menu Sections"></nav>
+        <button type="button" id="add-category-btn" class="btn-add-category" title="Add a new top-level menu category">
+          <span>+</span> Add Category
+        </button>
+      </div>
 
       <!-- Active Section Header & Actions -->
       <div class="section-header-card">
-        <div>
-          <h2 class="section-info-heading" id="section-title">Freshly Rolled</h2>
+        <div class="section-header-main">
+          <div class="section-title-row">
+            <h2 class="section-info-heading" id="section-title">Freshly Rolled</h2>
+            <div class="category-actions-row">
+              <button type="button" class="btn btn-secondary btn-sm" id="edit-category-btn" title="Edit Category Details">
+                ✏️ Edit Category
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" id="category-move-up-btn" title="Move Category Left / Up">
+                ◀
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" id="category-move-down-btn" title="Move Category Right / Down">
+                ▶
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" id="category-toggle-vis-btn" title="Toggle Category Visibility">
+                👁️ Active
+              </button>
+              <button type="button" class="btn btn-danger btn-sm" id="delete-category-btn" title="Delete Category">
+                🗑️ Delete Category
+              </button>
+            </div>
+          </div>
           <p class="section-info-meta" id="section-meta">Section 01</p>
+          <p class="section-info-intro" id="section-intro"></p>
         </div>
 
         <div class="toolbar-actions">
@@ -226,6 +251,96 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="config-modal-cancel">Cancel</button>
         <button type="button" class="btn btn-primary" id="config-save-btn">Save Connection</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 6. ADD CATEGORY MODAL ─── -->
+  <div class="modal-backdrop" id="add-category-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Add New Category</h3>
+        <button type="button" class="modal-close" id="add-category-close">&times;</button>
+      </div>
+      <form id="add-category-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="new-category-name">Category Name *</label>
+            <input type="text" id="new-category-name" class="form-control" placeholder="e.g. Fresh Juices" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="new-category-tag">Tag / Eyebrow (Optional)</label>
+            <input type="text" id="new-category-tag" class="form-control" placeholder="e.g. Natural Sips">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="new-category-intro">Introduction / Description (Optional)</label>
+            <textarea id="new-category-intro" class="form-control" rows="3" placeholder="e.g. Freshly pressed natural fruit juices and artisan concoctions."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="add-category-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="add-category-submit">+ Create Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ─── 7. EDIT CATEGORY MODAL ─── -->
+  <div class="modal-backdrop" id="edit-category-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="edit-category-modal-title">Edit Category</h3>
+        <button type="button" class="modal-close" id="edit-category-close">&times;</button>
+      </div>
+      <form id="edit-category-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="edit-category-name">Category Name *</label>
+            <input type="text" id="edit-category-name" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-category-tag">Tag / Eyebrow (Optional)</label>
+            <input type="text" id="edit-category-tag" class="form-control" placeholder="e.g. Signature">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-category-intro">Introduction / Description (Optional)</label>
+            <textarea id="edit-category-intro" class="form-control" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="edit-category-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="edit-category-submit">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ─── 8. DELETE CATEGORY MODAL ─── -->
+  <div class="modal-backdrop" id="delete-category-modal">
+    <div class="modal-dialog" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="delete-category-title" style="color: var(--danger);">Delete Category</h3>
+        <button type="button" class="modal-close" id="delete-category-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="delete-category-blocked" style="display: none;">
+          <p style="font-size: 0.92rem; line-height: 1.6; color: var(--chocolate); margin-bottom: 0.75rem;">
+            ⚠️ <strong>Cannot Delete Category</strong>
+          </p>
+          <p id="delete-category-blocked-msg" style="font-size: 0.85rem; color: var(--warm-mid); line-height: 1.5;"></p>
+        </div>
+        <div id="delete-category-allowed" style="display: none;">
+          <p style="font-size: 0.92rem; line-height: 1.6; color: var(--chocolate);">
+            Are you sure you want to delete category <strong id="delete-category-target-name"></strong>?
+          </p>
+          <p style="font-size: 0.78rem; color: var(--warm-mid); margin-top: 0.5rem;">
+            This will permanently remove the category and its empty default group from the database.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="delete-category-cancel">Cancel</button>
+        <button type="button" class="btn btn-danger" id="delete-category-confirm" style="display: none;">Delete Category</button>
       </div>
     </div>
   </div>

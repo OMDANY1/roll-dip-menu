@@ -197,15 +197,52 @@
   }
 
   /**
+   * Navigation label mapping for signature sections with clean fallback for new categories
+   */
+  const NAV_LABELS = {
+    'freshly-rolled': 'Rolls',
+    'mini-rolls': 'Mini Rolls',
+    'sweet-bites': 'Bites & Extras',
+    'better-together': 'Pairings',
+    'warm-cups': 'Warm Cups',
+    'sparkling-cups': 'Sparkling',
+    'cold-cups': 'Cold Cups',
+    'milkshakes': 'Shakes'
+  };
+
+  function getNavLabel(section) {
+    if (NAV_LABELS[section.slug]) return NAV_LABELS[section.slug];
+    return section.title_plain || (section.heading ? section.heading.replace(/<[^>]+>/g, '').trim() : section.slug);
+  }
+
+  /**
+   * Render dynamic navigation links
+   */
+  function renderNav(sections) {
+    const navLinksContainer = document.querySelector('.nav-links');
+    if (!navLinksContainer || !sections || sections.length === 0) return;
+
+    const navHtml = sections
+      .filter(s => s.is_active !== false)
+      .map(s => `<li><a href="#${escapeHtml(s.slug)}">${escapeHtml(getNavLabel(s))}</a></li>`)
+      .join('');
+    navLinksContainer.innerHTML = navHtml;
+  }
+
+  /**
    * Render all menu sections into DOM
    */
   function renderMenu(sections) {
     if (!menuContainer || !sections || sections.length === 0) return;
 
-    const html = sections.map(renderSection).join('');
+    const activeSections = sections.filter(s => s.is_active !== false);
+    const html = activeSections.map(renderSection).join('');
     menuContainer.innerHTML = html;
 
-    // Attach animations
+    // Render dynamic navigation matching current active categories & order
+    renderNav(activeSections);
+
+    // Attach animations & scroll observer tracking
     attachObservers();
   }
 
@@ -282,12 +319,7 @@
       try {
         const liveData = await window.RollDipSupabase.fetchPublicMenu();
         if (liveData && liveData.length > 0) {
-          // If live data differs from initial, update DOM smoothly
-          const liveJson = JSON.stringify(liveData);
-          const initialJson = JSON.stringify(initialData);
-          if (liveJson !== initialJson) {
-            renderMenu(liveData);
-          }
+          renderMenu(liveData);
         }
       } catch (err) {
         console.warn('[Roll&Dip] Using cached menu dataset:', err);

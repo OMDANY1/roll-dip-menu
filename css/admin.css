@@ -293,15 +293,52 @@ body {
 }
 
 /* Section Navigation Tabs */
+.sections-nav-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
 .sections-nav {
   display: flex;
   gap: 0.5rem;
   overflow-x: auto;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1.5rem;
+  padding-bottom: 0.35rem;
+  margin-bottom: 0;
   scrollbar-width: none;
+  flex: 1;
 }
 .sections-nav::-webkit-scrollbar { display: none; }
+
+.btn-add-category {
+  background: var(--surface);
+  border: 1px dashed var(--caramel);
+  color: var(--caramel);
+  padding: 0.65rem 1.1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.btn-add-category:hover {
+  background: var(--caramel);
+  color: #FFFFFF;
+  border-style: solid;
+  box-shadow: 0 4px 12px rgba(184, 115, 51, 0.2);
+}
+.btn-add-category span {
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1;
+}
 
 .section-tab-btn {
   background: var(--surface);
@@ -317,6 +354,26 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.section-tab-btn.is-inactive {
+  opacity: 0.6;
+  border-style: dashed;
+}
+
+.tab-hidden-badge {
+  font-size: 0.62rem;
+  background: rgba(168, 56, 43, 0.12);
+  color: var(--danger);
+  padding: 1px 5px;
+  border-radius: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.section-tab-btn.active .tab-hidden-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
 }
 
 .section-tab-btn:hover {
@@ -390,6 +447,17 @@ body {
   align-items: center;
   gap: 1.5rem;
   flex-wrap: wrap;
+.section-header-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.section-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
 }
 
 .section-info-heading {
@@ -399,10 +467,23 @@ body {
   line-height: 1.1;
 }
 
+.category-actions-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
 .section-info-meta {
   font-size: 0.78rem;
   color: var(--warm-mid);
-  margin-top: 0.25rem;
+}
+
+.section-info-intro {
+  font-size: 0.8rem;
+  color: var(--warm-mid);
+  font-style: italic;
+  max-width: 650px;
 }
 
 .toolbar-actions {

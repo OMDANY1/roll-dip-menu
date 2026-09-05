@@ -63,7 +63,37 @@
     configSaveBtn: document.getElementById('config-save-btn'),
     configModalClose: document.getElementById('config-modal-close'),
     configModalCancel: document.getElementById('config-modal-cancel'),
-    configPromptBtn: document.getElementById('config-prompt-btn')
+    configPromptBtn: document.getElementById('config-prompt-btn'),
+    // Category Management Elements
+    addCategoryBtn: document.getElementById('add-category-btn'),
+    editCategoryBtn: document.getElementById('edit-category-btn'),
+    categoryMoveUpBtn: document.getElementById('category-move-up-btn'),
+    categoryMoveDownBtn: document.getElementById('category-move-down-btn'),
+    categoryToggleVisBtn: document.getElementById('category-toggle-vis-btn'),
+    deleteCategoryBtn: document.getElementById('delete-category-btn'),
+    sectionIntro: document.getElementById('section-intro'),
+    addCategoryModal: document.getElementById('add-category-modal'),
+    addCategoryForm: document.getElementById('add-category-form'),
+    newCategoryName: document.getElementById('new-category-name'),
+    newCategoryTag: document.getElementById('new-category-tag'),
+    newCategoryIntro: document.getElementById('new-category-intro'),
+    addCategoryClose: document.getElementById('add-category-close'),
+    addCategoryCancel: document.getElementById('add-category-cancel'),
+    editCategoryModal: document.getElementById('edit-category-modal'),
+    editCategoryForm: document.getElementById('edit-category-form'),
+    editCategoryName: document.getElementById('edit-category-name'),
+    editCategoryTag: document.getElementById('edit-category-tag'),
+    editCategoryIntro: document.getElementById('edit-category-intro'),
+    editCategoryClose: document.getElementById('edit-category-close'),
+    editCategoryCancel: document.getElementById('edit-category-cancel'),
+    deleteCategoryModal: document.getElementById('delete-category-modal'),
+    deleteCategoryBlocked: document.getElementById('delete-category-blocked'),
+    deleteCategoryBlockedMsg: document.getElementById('delete-category-blocked-msg'),
+    deleteCategoryAllowed: document.getElementById('delete-category-allowed'),
+    deleteCategoryTargetName: document.getElementById('delete-category-target-name'),
+    deleteCategoryClose: document.getElementById('delete-category-close'),
+    deleteCategoryCancel: document.getElementById('delete-category-cancel'),
+    deleteCategoryConfirm: document.getElementById('delete-category-confirm')
   };
 
   // Toast notification helper
@@ -257,12 +287,14 @@
         });
       });
 
+      const isVisible = sec.is_active !== false;
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = `section-tab-btn ${isActive ? 'active' : ''}`;
+      btn.className = `section-tab-btn ${isActive ? 'active' : ''} ${!isVisible ? 'is-inactive' : ''}`;
       btn.innerHTML = `
         <span class="tab-num">${escapeHtml(sec.section_number)}</span>
         <span>${escapeHtml(sec.title_plain)}</span>
+        ${!isVisible ? '<span class="tab-hidden-badge">Hidden</span>' : ''}
         <span class="tab-count">${activeItems}/${totalItems}</span>
       `;
 
@@ -291,7 +323,29 @@
     if (els.sectionMeta) {
       const tag = currentSection.tag ? `[${currentSection.tag}] ` : '';
       const layout = `Layout: ${currentSection.layout_type || 'default'}`;
-      els.sectionMeta.textContent = `${tag}Section ${currentSection.section_number} • ${layout}`;
+      const statusText = currentSection.is_active !== false ? 'Active' : 'Hidden';
+      els.sectionMeta.textContent = `${tag}Section ${currentSection.section_number} • ${layout} • ${statusText}`;
+    }
+    if (els.sectionIntro) {
+      els.sectionIntro.textContent = currentSection.introduction || '';
+    }
+
+    // Update Category Visibility button
+    if (els.categoryToggleVisBtn) {
+      const isVis = currentSection.is_active !== false;
+      els.categoryToggleVisBtn.innerHTML = isVis ? '👁️ Active' : '👁️‍🗨️ Hidden';
+      els.categoryToggleVisBtn.title = isVis ? 'Click to hide this category from public menu' : 'Click to make this category visible on public menu';
+    }
+
+    // Update Category Reorder buttons (disable if at boundaries)
+    const secIdx = state.sections.findIndex(s => (s.id || s.slug) === state.activeSectionId);
+    if (els.categoryMoveUpBtn) {
+      els.categoryMoveUpBtn.disabled = secIdx <= 0;
+      els.categoryMoveUpBtn.style.opacity = secIdx <= 0 ? '0.4' : '1';
+    }
+    if (els.categoryMoveDownBtn) {
+      els.categoryMoveDownBtn.disabled = secIdx >= state.sections.length - 1;
+      els.categoryMoveDownBtn.style.opacity = secIdx >= state.sections.length - 1 ? '0.4' : '1';
     }
 
     // Render Group Sub-tabs
@@ -826,6 +880,439 @@
         showToast('Supabase connection settings saved!', 'success');
         closeConfigModal();
         initAuth();
+      }
+    });
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // CATEGORY MANAGEMENT
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  function generateCategorySlug(name, existingSections = []) {
+    let base = name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-');
+    if (!base) base = 'category';
+
+    const existingSlugs = existingSections.map(s => (s.slug || '').toLowerCase());
+    let slug = base;
+    let counter = 2;
+    while (existingSlugs.includes(slug)) {
+      slug = `${base}-${counter}`;
+      counter++;
+    }
+    return slug;
+  }
+
+  function getNextSectionNumber(sections = []) {
+    let maxNum = 0;
+    sections.forEach(s => {
+      const num = parseInt(s.section_number, 10);
+      if (!isNaN(num) && num > maxNum) {
+        maxNum = num;
+      }
+    });
+    const next = maxNum + 1;
+    return next < 10 ? `0${next}` : String(next);
+  }
+
+  function getNextSortOrder(sections = []) {
+    let maxOrder = 0;
+    sections.forEach(s => {
+      if (typeof s.sort_order === 'number' && s.sort_order > maxOrder) {
+        maxOrder = s.sort_order;
+      }
+    });
+    return maxOrder + 1;
+  }
+
+  function formatCategoryHeading(name) {
+    const trimmed = (name || '').trim();
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 1) {
+      return `<em>${escapeHtml(parts[0])}</em>`;
+    }
+    const first = parts.slice(0, -1).join(' ');
+    const last = parts[parts.length - 1];
+    return `${escapeHtml(first)}<br><em>${escapeHtml(last)}</em>`;
+  }
+
+  // 1. Add Category
+  function openAddCategoryModal() {
+    if (els.newCategoryName) els.newCategoryName.value = '';
+    if (els.newCategoryTag) els.newCategoryTag.value = '';
+    if (els.newCategoryIntro) els.newCategoryIntro.value = '';
+    if (els.addCategoryModal) {
+      els.addCategoryModal.classList.add('show');
+      setTimeout(() => els.newCategoryName && els.newCategoryName.focus(), 100);
+    }
+  }
+
+  function closeAddCategoryModal() {
+    if (els.addCategoryModal) els.addCategoryModal.classList.remove('show');
+  }
+
+  if (els.addCategoryBtn) els.addCategoryBtn.addEventListener('click', openAddCategoryModal);
+  if (els.addCategoryClose) els.addCategoryClose.addEventListener('click', closeAddCategoryModal);
+  if (els.addCategoryCancel) els.addCategoryCancel.addEventListener('click', closeAddCategoryModal);
+
+  if (els.addCategoryForm) {
+    els.addCategoryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = (els.newCategoryName.value || '').trim();
+      if (!name) return;
+      const tag = (els.newCategoryTag.value || '').trim();
+      const intro = (els.newCategoryIntro.value || '').trim();
+
+      const client = window.RollDipSupabase ? window.RollDipSupabase.getClient() : null;
+      if (!client) {
+        showToast('Supabase client is not connected', 'error');
+        return;
+      }
+
+      const submitBtn = els.addCategoryForm.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating...';
+      }
+
+      try {
+        const slug = generateCategorySlug(name, state.sections);
+        const sectionNumber = getNextSectionNumber(state.sections);
+        const sortOrder = getNextSortOrder(state.sections);
+        const heading = formatCategoryHeading(name);
+
+        // 1. Insert section
+        const { data: newSec, error: secErr } = await client
+          .from('menu_sections')
+          .insert({
+            slug,
+            section_number: sectionNumber,
+            tag: tag || null,
+            heading,
+            title_plain: name,
+            introduction: intro || null,
+            layout_type: 'layout-balanced',
+            card_classes: 'wide',
+            sort_order: sortOrder,
+            is_active: true
+          })
+          .select()
+          .single();
+
+        if (secErr) throw secErr;
+
+        // 2. Insert default group
+        const { data: newGrp, error: grpErr } = await client
+          .from('menu_groups')
+          .insert({
+            section_id: newSec.id,
+            slug: `${slug}-main`,
+            title: name,
+            subtitle: null,
+            tag: null,
+            display_type: 'regular',
+            sort_order: 1,
+            is_active: true
+          })
+          .select()
+          .single();
+
+        if (grpErr) throw grpErr;
+
+        newSec.groups = [{ ...newGrp, items: [] }];
+        state.sections.push(newSec);
+        state.sections.sort((a, b) => a.sort_order - b.sort_order);
+        state.activeSectionId = newSec.id;
+        state.activeGroupId = null;
+
+        closeAddCategoryModal();
+        renderSectionsNav();
+        renderCurrentSection();
+        showToast(`Category "${name}" created successfully!`, 'success');
+      } catch (err) {
+        console.error('[Admin] Error creating category:', err);
+        showToast(`Failed to create category: ${err.message}`, 'error');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '+ Create Category';
+        }
+      }
+    });
+  }
+
+  // 2. Edit Category
+  function openEditCategoryModal() {
+    const currentSection = state.sections.find(s => (s.id || s.slug) === state.activeSectionId);
+    if (!currentSection) return;
+
+    if (els.editCategoryModalTitle) {
+      els.editCategoryModalTitle.textContent = `Edit Category: ${currentSection.title_plain}`;
+    }
+    if (els.editCategoryName) els.editCategoryName.value = currentSection.title_plain || '';
+    if (els.editCategoryTag) els.editCategoryTag.value = currentSection.tag || '';
+    if (els.editCategoryIntro) els.editCategoryIntro.value = currentSection.introduction || '';
+
+    if (els.editCategoryModal) {
+      els.editCategoryModal.classList.add('show');
+      setTimeout(() => els.editCategoryName && els.editCategoryName.focus(), 100);
+    }
+  }
+
+  function closeEditCategoryModal() {
+    if (els.editCategoryModal) els.editCategoryModal.classList.remove('show');
+  }
+
+  if (els.editCategoryBtn) els.editCategoryBtn.addEventListener('click', openEditCategoryModal);
+  if (els.editCategoryClose) els.editCategoryClose.addEventListener('click', closeEditCategoryModal);
+  if (els.editCategoryCancel) els.editCategoryCancel.addEventListener('click', closeEditCategoryModal);
+
+  if (els.editCategoryForm) {
+    els.editCategoryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const currentSection = state.sections.find(s => (s.id || s.slug) === state.activeSectionId);
+      if (!currentSection) return;
+
+      const name = (els.editCategoryName.value || '').trim();
+      if (!name) return;
+      const tag = (els.editCategoryTag.value || '').trim();
+      const intro = (els.editCategoryIntro.value || '').trim();
+
+      const client = window.RollDipSupabase ? window.RollDipSupabase.getClient() : null;
+      if (!client) {
+        showToast('Supabase client is not connected', 'error');
+        return;
+      }
+
+      const submitBtn = els.editCategoryForm.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+      }
+
+      try {
+        const heading = formatCategoryHeading(name);
+        const { error } = await client
+          .from('menu_sections')
+          .update({
+            title_plain: name,
+            heading,
+            tag: tag || null,
+            introduction: intro || null
+          })
+          .eq('id', currentSection.id);
+
+        if (error) throw error;
+
+        currentSection.title_plain = name;
+        currentSection.heading = heading;
+        currentSection.tag = tag || null;
+        currentSection.introduction = intro || null;
+
+        closeEditCategoryModal();
+        renderSectionsNav();
+        renderCurrentSection();
+        showToast(`Category "${name}" updated successfully!`, 'success');
+      } catch (err) {
+        console.error('[Admin] Error updating category:', err);
+        showToast(`Failed to update category: ${err.message}`, 'error');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Save Changes';
+        }
+      }
+    });
+  }
+
+  // 3. Toggle Category Visibility
+  if (els.categoryToggleVisBtn) {
+    els.categoryToggleVisBtn.addEventListener('click', async () => {
+      const currentSection = state.sections.find(s => (s.id || s.slug) === state.activeSectionId);
+      if (!currentSection) return;
+
+      const client = window.RollDipSupabase ? window.RollDipSupabase.getClient() : null;
+      if (!client) {
+        showToast('Supabase client is not connected', 'error');
+        return;
+      }
+
+      const newActive = currentSection.is_active === false ? true : false;
+      els.categoryToggleVisBtn.disabled = true;
+
+      try {
+        const { error } = await client
+          .from('menu_sections')
+          .update({ is_active: newActive })
+          .eq('id', currentSection.id);
+
+        if (error) throw error;
+
+        currentSection.is_active = newActive;
+        renderSectionsNav();
+        renderCurrentSection();
+        showToast(`Category "${currentSection.title_plain}" is now ${newActive ? 'visible' : 'hidden'}`, 'success');
+      } catch (err) {
+        console.error('[Admin] Visibility toggle error:', err);
+        showToast(`Failed to update visibility: ${err.message}`, 'error');
+      } finally {
+        els.categoryToggleVisBtn.disabled = false;
+      }
+    });
+  }
+
+  // 4. Reorder Category (Move Up / Down)
+  async function moveCategory(direction) {
+    const idx = state.sections.findIndex(s => (s.id || s.slug) === state.activeSectionId);
+    if (idx === -1) return;
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= state.sections.length) return;
+
+    const client = window.RollDipSupabase ? window.RollDipSupabase.getClient() : null;
+    if (!client) {
+      showToast('Supabase client is not connected', 'error');
+      return;
+    }
+
+    const current = state.sections[idx];
+    const target = state.sections[targetIdx];
+
+    let currentOrder = current.sort_order;
+    let targetOrder = target.sort_order;
+    if (currentOrder === targetOrder) {
+      currentOrder = direction > 0 ? targetOrder + 1 : targetOrder - 1;
+    }
+
+    try {
+      if (els.categoryMoveUpBtn) els.categoryMoveUpBtn.disabled = true;
+      if (els.categoryMoveDownBtn) els.categoryMoveDownBtn.disabled = true;
+
+      const [res1, res2] = await Promise.all([
+        client.from('menu_sections').update({ sort_order: targetOrder }).eq('id', current.id),
+        client.from('menu_sections').update({ sort_order: currentOrder }).eq('id', target.id)
+      ]);
+
+      if (res1.error) throw res1.error;
+      if (res2.error) throw res2.error;
+
+      current.sort_order = targetOrder;
+      target.sort_order = currentOrder;
+
+      state.sections.sort((a, b) => a.sort_order - b.sort_order);
+
+      renderSectionsNav();
+      renderCurrentSection();
+      showToast(`Category order updated`, 'success');
+    } catch (err) {
+      console.error('[Admin] Reorder error:', err);
+      showToast(`Failed to reorder: ${err.message}`, 'error');
+    } finally {
+      const newIdx = state.sections.findIndex(s => (s.id || s.slug) === state.activeSectionId);
+      if (els.categoryMoveUpBtn) {
+        els.categoryMoveUpBtn.disabled = newIdx <= 0;
+        els.categoryMoveUpBtn.style.opacity = newIdx <= 0 ? '0.4' : '1';
+      }
+      if (els.categoryMoveDownBtn) {
+        els.categoryMoveDownBtn.disabled = newIdx >= state.sections.length - 1;
+        els.categoryMoveDownBtn.style.opacity = newIdx >= state.sections.length - 1 ? '0.4' : '1';
+      }
+    }
+  }
+
+  if (els.categoryMoveUpBtn) els.categoryMoveUpBtn.addEventListener('click', () => moveCategory(-1));
+  if (els.categoryMoveDownBtn) els.categoryMoveDownBtn.addEventListener('click', () => moveCategory(1));
+
+  // 5. Delete Category
+  let categoryPendingDelete = null;
+
+  function openDeleteCategoryModal() {
+    const currentSection = state.sections.find(s => (s.id || s.slug) === state.activeSectionId);
+    if (!currentSection) return;
+
+    categoryPendingDelete = currentSection;
+
+    let totalItems = 0;
+    (currentSection.groups || []).forEach(g => {
+      totalItems += (g.items || []).length;
+    });
+
+    if (totalItems > 0) {
+      if (els.deleteCategoryBlocked) els.deleteCategoryBlocked.style.display = 'block';
+      if (els.deleteCategoryBlockedMsg) {
+        els.deleteCategoryBlockedMsg.textContent = `"${currentSection.title_plain}" contains ${totalItems} menu item(s). Remove or move these items before deleting this category.`;
+      }
+      if (els.deleteCategoryAllowed) els.deleteCategoryAllowed.style.display = 'none';
+      if (els.deleteCategoryConfirm) els.deleteCategoryConfirm.style.display = 'none';
+    } else {
+      if (els.deleteCategoryBlocked) els.deleteCategoryBlocked.style.display = 'none';
+      if (els.deleteCategoryAllowed) els.deleteCategoryAllowed.style.display = 'block';
+      if (els.deleteCategoryTargetName) {
+        els.deleteCategoryTargetName.textContent = `"${currentSection.title_plain}"`;
+      }
+      if (els.deleteCategoryConfirm) els.deleteCategoryConfirm.style.display = 'inline-block';
+    }
+
+    if (els.deleteCategoryModal) {
+      els.deleteCategoryModal.classList.add('show');
+    }
+  }
+
+  function closeDeleteCategoryModal() {
+    if (els.deleteCategoryModal) els.deleteCategoryModal.classList.remove('show');
+    categoryPendingDelete = null;
+  }
+
+  if (els.deleteCategoryBtn) els.deleteCategoryBtn.addEventListener('click', openDeleteCategoryModal);
+  if (els.deleteCategoryClose) els.deleteCategoryClose.addEventListener('click', closeDeleteCategoryModal);
+  if (els.deleteCategoryCancel) els.deleteCategoryCancel.addEventListener('click', closeDeleteCategoryModal);
+
+  if (els.deleteCategoryConfirm) {
+    els.deleteCategoryConfirm.addEventListener('click', async () => {
+      if (!categoryPendingDelete) return;
+
+      const client = window.RollDipSupabase ? window.RollDipSupabase.getClient() : null;
+      if (!client) {
+        showToast('Supabase client is not connected', 'error');
+        return;
+      }
+
+      els.deleteCategoryConfirm.disabled = true;
+      els.deleteCategoryConfirm.textContent = 'Deleting...';
+
+      try {
+        const { error } = await client
+          .from('menu_sections')
+          .delete()
+          .eq('id', categoryPendingDelete.id);
+
+        if (error) throw error;
+
+        const deletedTitle = categoryPendingDelete.title_plain;
+        state.sections = state.sections.filter(s => s.id !== categoryPendingDelete.id);
+        closeDeleteCategoryModal();
+
+        if (state.sections.length > 0) {
+          state.activeSectionId = state.sections[0].id || state.sections[0].slug;
+        } else {
+          state.activeSectionId = null;
+        }
+        state.activeGroupId = null;
+
+        renderSectionsNav();
+        renderCurrentSection();
+        showToast(`Category "${deletedTitle}" deleted successfully`, 'success');
+      } catch (err) {
+        console.error('[Admin] Error deleting category:', err);
+        showToast(`Failed to delete category: ${err.message}`, 'error');
+      } finally {
+        if (els.deleteCategoryConfirm) {
+          els.deleteCategoryConfirm.disabled = false;
+          els.deleteCategoryConfirm.textContent = 'Delete Category';
+        }
       }
     });
   }

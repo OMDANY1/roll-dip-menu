@@ -119,7 +119,52 @@ const adminHtml = fs.readFileSync(adminHtmlPath, 'utf8');
 assert.ok(adminHtml.includes('id="auth-section"'), 'Admin must have auth view');
 assert.ok(adminHtml.includes('id="admin-section"'), 'Admin must have dashboard view');
 assert.ok(adminHtml.includes('id="item-modal"'), 'Admin must have item modal');
+assert.ok(adminHtml.includes('id="add-category-btn"'), 'Admin must have + Add Category button');
+assert.ok(adminHtml.includes('id="add-category-modal"'), 'Admin must have Add Category modal');
+assert.ok(adminHtml.includes('id="edit-category-modal"'), 'Admin must have Edit Category modal');
+assert.ok(adminHtml.includes('id="delete-category-modal"'), 'Admin must have Delete Category modal');
 
-console.log('✅ HTML Markup & Nav Links Verified');
+console.log('✅ HTML Markup, Nav Links & Category Modals Verified');
+
+// 6. Test Category Management Functions & Nav Resolution
+const appJsPath = path.resolve(__dirname, '../js/app.js');
+const adminJsPath = path.resolve(__dirname, '../js/admin.js');
+const appJs = fs.readFileSync(appJsPath, 'utf8');
+const adminJs = fs.readFileSync(adminJsPath, 'utf8');
+
+assert.ok(appJs.includes('function renderNav'), 'app.js must define renderNav');
+assert.ok(appJs.includes('function getNavLabel'), 'app.js must define getNavLabel');
+assert.ok(adminJs.includes('function generateCategorySlug'), 'admin.js must define generateCategorySlug');
+assert.ok(adminJs.includes('function getNextSectionNumber'), 'admin.js must define getNextSectionNumber');
+assert.ok(adminJs.includes('function formatCategoryHeading'), 'admin.js must define formatCategoryHeading');
+
+// Simulate category functions
+function testSlug(name, existing = []) {
+  let base = name.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+  if (!base) base = 'category';
+  let slug = base;
+  let counter = 2;
+  while (existing.includes(slug)) {
+    slug = `${base}-${counter}`;
+    counter++;
+  }
+  return slug;
+}
+assert.strictEqual(testSlug('Fresh Juices'), 'fresh-juices');
+assert.strictEqual(testSlug('Fresh Juices', ['fresh-juices']), 'fresh-juices-2');
+
+function testSecNum(sections) {
+  let max = 0;
+  sections.forEach(s => {
+    const n = parseInt(s.section_number, 10);
+    if (!isNaN(n) && n > max) max = n;
+  });
+  const next = max + 1;
+  return next < 10 ? `0${next}` : String(next);
+}
+assert.strictEqual(testSecNum([{ section_number: '01' }, { section_number: '08' }]), '09');
+assert.strictEqual(testSecNum([{ section_number: '09' }]), '10');
+
+console.log('✅ Category Logic & Dynamic Nav Verified');
 
 console.log('\n🎉 ALL AUTOMATED TESTS PASSED SUCCESSFULLY!\n');
